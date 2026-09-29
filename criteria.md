@@ -33,10 +33,14 @@ Every answer the system produces names at least one source document.
 
 **Why this target:**
 
-
 The Prompt builder in our system has specific rules which says "Name the document your answer came from, using the filename given in each excerpt"  and another rule "If the documents don't cover the question, say you don't have enough information. Do not guess"
 
 This target is of very high importance as we want reponses to be grounded to facts available. 
+
+> **Revised in week 2:** 
+For every question that receives an answer (not a refusal), the system names at least one source document, and that document is one that actually contains the stated fact — 5 of 5 test questions, across all 3 runs.
+
+> **Why revised:**  The target was not specifc . When it was failing and saying not found it will not be able to find the document. Incase the answer is found then it forces me to check if the information is indeed there in the doc. So this will help validate the responses are grounded. Eaarlier one was not that clear.
 
 --- 
 
@@ -51,14 +55,19 @@ in at least 4 of 5 tries.
 
 The Prompt builder in our system has specific rules :  "If the documents don't cover the question, say you don't have enough information. Do not guess". But there will be occurance that the vector dimension was not big enough and some of the projections overlapped due to lower dimension. The distance criteria should help us filter anything that is above 0.6 is what the defaults setting is
 
+> **Revised in week 2:** 
+When I ask a question which my corpus documents don't say clearly, the relevance gate's distance check stops it before generation, and the system returns a refusal ("I don't have enough information about that") — for at least 4 of 5 out-of-corpus test questions
+
+> **Why revised:**  The gate exists as a first line of defense against ungrounded answers, independent of whether the LLM follows its "don't guess" instruction — it should stop clearly out-of-scope questions on distance alone. I'm not setting this at 5/5 because a lower-dimensional embedding model can produce overlapping projections for questions that are semantically distant but happen to land close in vector space; the 0.5 distance cutoff is a threshold, not a guarantee, so I expect the occasional edge case to slip past it even with clearly out-of-corpus input.
+This also helps us in reducing unnecessary call to LLM ie when there are no vectors retrived from the vector DB
 --- 
 
-## 4. Something about your chunks
+## 4. Something about your chunks (Chunk context and sizing)
 
 Within a sample of 5 chunks 4 or more chunks should be:
 - Do not span the paragraph boundary
 - Begin and end sentence boundary
-- Chunks size is not longer than 900 characters which with an average token size of 4 charater gives us about 225 tokens  which is below the vector size for the embedding for the one we are using(limit is 256 for Mini LLM -L6-V2) 
+- Chunks size is not longer than 900 characters which with an average token size of 4 character gives us about 225 tokens  which is below the vector size for the embedding for the one we are using(limit is 256 for Mini LLM -L6-V2) 
 
 **Why this target:**
 Any AI based application that we build shoiuld give helpful answers which means should be with context. If the chunks size is not good enough we may not be able have enough context captured. If the chunk size is too big we will have context dilution as context is captured through attention mechanism. So we need to have a balance and the vector dimention of the embedding model needs to be taken into consideration . If the embedding model supports larger vector(higher dimension) then we will be able to capture the context better.
@@ -68,9 +77,17 @@ Any AI based application that we build shoiuld give helpful answers which means 
 - Begin and end sentence boundary will make sure we have proper context and its not truncating and causing confugion with LLM for its generation
 
 - Chunk size is not longer than 900 characters which with an average token size of 4 charater gives us about 225 tokens  which is below the vector size for the embedding for the one we are using(limit is 256 for Mini LLM -L6-V2)
+
+> **Revised in week 2:** 
+Within a sample of 5 chunks, at least 4 must satisfy all of the following: 
+ - The chunk does not span a paragraph boundary.  
+ - It begins and ends on a sentence boundary 
+ - it is no longer than 900 characters
+
+> **Why revised:**  The earlier criteria was not objective  and that can be easily validated. There were reasons mixed with criteria 
 ---
 
-## 5. Your choice
+## 5. Your choice (Accuracy of response)
 
 <!-- YOU WRITE THIS ONE TOO.
 
@@ -79,7 +96,7 @@ Any AI based application that we build shoiuld give helpful answers which means 
      handles badly, about source attribution being correct rather than merely
      present — anything, as long as it names a number or an observable
      outcome. -->
-- Accuracy  of response- I would like the score to be preferably below 0.5 and as near to 0.3 as possible
+- **Accuracy  of response** - I would like the score to be preferably below 0.5 and as near to 0.3 as possible
 - No non relevant answer and low halucination- If there is no content for a specific question the retreival should say not found and LLM should not respond with a cooked up answer (i.e low halucination)
 
 
@@ -87,7 +104,10 @@ Any AI based application that we build shoiuld give helpful answers which means 
 
 I care about accuracy of information and that would mean relevant, having context, not hallunicanated  and within a reasonable amount of wait time.
 
+> **Revised in week 2:** 
+For at least 4 of my 5 test questions, every one of the 3 runs produces an answer containing only facts present in the retrieved chunks. It should not add anything not found in the retreived text.
 
+> **Why revised:**  The earlier criteria was not objective and 0.5 and 0.3 mentioned is a distance in the vector database  and not reflecting the hallucinarion which was my intentn to stcontrol and elliminateop. This new criteria is lot more objective and clear
 ---
 
 <!-- ─────────────────────────────────────────────────────────────────────────

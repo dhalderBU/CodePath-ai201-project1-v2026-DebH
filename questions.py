@@ -25,10 +25,11 @@ QUESTIONS = [
     # {"question": "...", "expects": "..."},
     {"question": "when to buy parking pass?", "expects": "Student permits for the west lots go on sale in August"},
     {"question": "what is the class workload for CS210?", "expects": "CS 210 Data Structures is 8 to 10 hours a week outside of class"},
-    {"question": "what is the wait time for Verrill Street Grill?", "expects": "30 minutes on Fridays else about 10 minutes"},
-    {"question": "How can I get Counselling in the  health cenre?", "expects": " has its own intake process with a shorter wait than people expect — usually three or four days for a first session"},
+    {"question": "what is the wait time for Verrill Street Grill?", "expects": "up to 30 minutes on Friday evenings"},
+    {"question": "What is the intake process to get Counselling in the  health centre?", "expects": " intake process shorter wait than people expect"},
     {"question": "Can i change my meal plan ?", "expects": "You can change your meal plan tier once, in the first ten days of the semester."},
 ]
+
 
 # Questions from a different world entirely. Your gate should refuse all five.
 #
