@@ -30,7 +30,6 @@ QUESTIONS = [
     {"question": "Can i change my meal plan ?", "expects": "You can change your meal plan tier once, in the first ten days of the semester."},
 ]
 
-
 # Questions from a different world entirely. Your gate should refuse all five.
 #
 # There are five of these because criterion 3 in criteria.md names a target of

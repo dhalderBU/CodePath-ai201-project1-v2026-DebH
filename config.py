@@ -30,8 +30,6 @@ CORPUS = os.getenv("AI201_CORPUS", "campus_life")
 CHUNK_SIZE = 800        # characters per chunk
 CHUNK_OVERLAP = 120     # characters shared between neighbouring chunks
 
-# *******Deb***
-
 # =====================================================================
 # Chunker configuration
 # =====================================================================
@@ -41,11 +39,11 @@ CHUNK_OVERLAP = 120     # characters shared between neighbouring chunks
 #                 (starter's fixed-size character windows, ignores corpus)
 # "experiment" -> chunker.py::split_documents
 #                 (structure-aware, per-corpus strategy and sizing)
-# Milestone 3 asks you to compare the two. Flip this to A/B without
+# Milestone 3 asks  to compare the two. Flip this to A/B without
 # editing any code, then re-run `python app.py --corpus X index` and
 # `python app.py --corpus X chunks -n 10`.
-# CHUNKER_MODE = "original"     # "original" | "experiment"
-#CHUNKER_MODE = "experiment"   # "original" | "experiment"
+#CHUNKER_MODE = "original"     # "original" | "experiment"
+CHUNKER_MODE = "experiment"   # "original" | "experiment"
 
 
 # ---- Global chunk-size defaults --------------------------------------
@@ -96,20 +94,9 @@ CORPUS_SETTINGS = {
 }
 
 
-# *******Deb***
-
-# ─── Chunking (Milestone 3) ──────────────────────────────────────────────────
-# These are deliberately plain, generic numbers. Milestone 3 is where you
-# replace them with numbers that fit the documents you actually read.
-
-CHUNK_SIZE = 1200        # characters per chunk
-CHUNK_OVERLAP = 120     # characters shared between neighbouring chunks
-
-
-
 # ─── Retrieval (Milestone 4) ─────────────────────────────────────────────────
 
-TOP_K = 3               # how many chunks to pull back per question
+TOP_K = 5               # how many chunks to pull back per question
 
 # The relevance gate. If the best chunk is further away than this, the system
 # refuses to answer instead of handing the model thin material.
@@ -119,7 +106,7 @@ TOP_K = 3               # how many chunks to pull back per question
 # 0.6 is a reasonable starting point, not a right answer. Milestone 4 has you
 # measure your own two groups of distances and put the cutoff in the gap.
 # Most corpora land somewhere between 0.45 and 0.75.
-THRESHOLD = 0.5
+THRESHOLD = 0.5      # set this tighter  so as I can get more deterministic answer.
 
 
 # ─── Models ──────────────────────────────────────────────────────────────────

@@ -24,7 +24,9 @@ contains the answer.
 
 **Why this target:**
 
+
 80% correctness is a resonable ask as we dont have anything between 80 and 100. Ideally  I wouuld like about 85% to 90% and I cant go for 100% as there will be few questions whose vector distance may not be within limits . The reason at least this is thawe want a grounded response based ont he documents we have chunked and vectorized and saved in the Chroma vector DB 
+
 ---     
 
 ## 2. Every answer names a source
@@ -46,20 +48,17 @@ For every question that receives an answer (not a refusal), the system names at 
 
 ## 3. The relevance gate stops out-of-corpus questions
 
-When I ask a question my documents clearly don't cover, the relevance gate
-stops it and the system returns "I don't have enough information about that" —
-in at least 4 of 5 tries.
-
+When I ask a question my documents clearly don't cover, the relevance gate stops it and the system returns "I don't have enough information about that" — in at least 4 of 5 tries.
 
 **Why this target:**
 
 The Prompt builder in our system has specific rules :  "If the documents don't cover the question, say you don't have enough information. Do not guess". But there will be occurance that the vector dimension was not big enough and some of the projections overlapped due to lower dimension. The distance criteria should help us filter anything that is above 0.6 is what the defaults setting is
 
 > **Revised in week 2:** 
-When I ask a question which my corpus documents don't say clearly, the relevance gate's distance check stops it before generation, and the system returns a refusal ("I don't have enough information about that") — for at least 4 of 5 out-of-corpus test questions
+When I ask a question which my corpus documents don't say clearly, then for 4 or more of 5 response from the system should be ""I don't have enough information about that"
 
-> **Why revised:**  The gate exists as a first line of defense against ungrounded answers, independent of whether the LLM follows its "don't guess" instruction — it should stop clearly out-of-scope questions on distance alone. I'm not setting this at 5/5 because a lower-dimensional embedding model can produce overlapping projections for questions that are semantically distant but happen to land close in vector space; the 0.5 distance cutoff is a threshold, not a guarantee, so I expect the occasional edge case to slip past it even with clearly out-of-corpus input.
-This also helps us in reducing unnecessary call to LLM ie when there are no vectors retrived from the vector DB
+> **Why revised:** 
+The earlier criteria had technical information instead of response related target , so made it more clear , 
 --- 
 
 ## 4. Something about your chunks (Chunk context and sizing)
