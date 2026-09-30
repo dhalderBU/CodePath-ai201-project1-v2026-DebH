@@ -53,11 +53,12 @@ def load_scorer():
 
 def run_once(question: str, top_k, threshold, corpus, variant):
     """One question, one run. Returns the answer and what retrieval gave us."""
-    from store import search
+    # Deb Hybrid: evaluate the same fused retriever used by production queries.
+    from store import hybrid_search
     import gate
     from generate import answer_from_chunks
 
-    results = search(question, top_k=top_k, corpus=corpus, variant=variant)
+    results = hybrid_search(question, top_k=top_k, corpus=corpus, variant=variant)
     decision = gate.check(results, threshold=threshold)
 
     if not decision.passed:
@@ -148,7 +149,8 @@ def check_out_of_scope(top_k, threshold, corpus, variant):
     call and no reason to run it three times — retrieval is deterministic and
     the gate is a comparison against a fixed number.
     """
-    from store import search
+    # Deb Hybrid: apply the same fused retriever to gate evaluation.
+    from store import hybrid_search
     import gate
 
     questions = getattr(qs, "OUT_OF_SCOPE", [])
@@ -158,7 +160,7 @@ def check_out_of_scope(top_k, threshold, corpus, variant):
     print("\nOut-of-scope questions (the gate should refuse these):")
     rows = []
     for question in questions:
-        results = search(question, top_k=top_k, corpus=corpus, variant=variant)
+        results = hybrid_search(question, top_k=top_k, corpus=corpus, variant=variant)
         decision = gate.check(results, threshold=threshold)
         refused = not decision.passed
         print(f"  {'refused' if refused else 'LET THROUGH'}  "

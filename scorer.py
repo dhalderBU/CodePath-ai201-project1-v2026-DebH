@@ -39,16 +39,31 @@ STOP_WORDS = {
 
 def _content_words(text: str) -> set[str]:
     """Return lowercase words from text after removing common stop words."""
-    words = re.findall(r"[a-z0-9]+", text.lower())
+    normalized = re.sub(r"(\d)\s+(am|pm)\b", r"\1\2", text.lower())
+    words = re.findall(r"[a-z0-9]+", normalized)
     return {word for word in words if word not in STOP_WORDS}
-
-
+'''
 def judge(question: str, expects: str, answer: str, results) -> bool:
     """
     Return True when every expected content word appears in the answer.
 
     Stop words are ignored, and the expected words do not need to appear in
     the same order.
+    """
+    expected_words = _content_words(expects)
+    if not expected_words:
+        return False
+
+    answer_words = _content_words(answer or "")
+    return expected_words <= answer_words
+
+'''
+def judge(question: str, expects: str, answer: str, results) -> bool:
+    """
+    Return True when every expected content word appears in the answer.
+
+    Stop words are ignored, and expected words do not need to appear
+    in the same order.
     """
     expected_words = _content_words(expects)
     if not expected_words:

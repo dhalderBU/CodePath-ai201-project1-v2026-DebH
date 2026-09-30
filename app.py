@@ -154,10 +154,11 @@ def cmd_chunks(args):
 
 def cmd_retrieve(args):
     """Milestone 4. Retrieval only, with distances, and no model call."""
-    from store import search
+    # Deb Hybrid: use semantic and keyword retrieval for CLI inspection.
+    from store import hybrid_search
     import gate
 
-    results = search(
+    results = hybrid_search(
         args.question,
         top_k=args.top_k or config.TOP_K,
         corpus=args.corpus or config.CORPUS,
@@ -207,11 +208,12 @@ def ask_pipeline(
     prompt just before it goes out — that's how `--show-prompt` shows you the
     prompt while the model is still thinking rather than after.
     """
-    from store import search
+    # Deb Hybrid: use the fused retriever for the answer pipeline.
+    from store import hybrid_search
     import gate
     from generate import answer_from_chunks, build_prompt
 
-    results = search(
+    results = hybrid_search(
         question,
         top_k=top_k or config.TOP_K,
         corpus=corpus or config.CORPUS,

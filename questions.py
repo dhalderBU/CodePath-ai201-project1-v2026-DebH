@@ -20,13 +20,24 @@ happened into your run log — that's the evidence for criterion 3.
 Swap them for your own if you like. Keep five of them either way: criterion 3
 names a target of "4 of 5", and four of three is not a thing.
 """
-
+'''
 QUESTIONS = [
     # {"question": "...", "expects": "..."},
     {"question": "when to buy parking pass?", "expects": "Student permits for the west lots go on sale in August"},
     {"question": "what is the class workload for CS210?", "expects": "CS 210 Data Structures is 8 to 10 hours a week outside of class"},
     {"question": "what is the wait time for Verrill Street Grill?", "expects": "up to 30 minutes on Friday evenings"},
     {"question": "What is the intake process to get Counselling in the  health centre?", "expects": " intake process shorter wait than people expect"},
+    {"question": "Can i change my meal plan ?", "expects": "You can change your meal plan tier once, in the first ten days of the semester."},
+]
+'''
+
+QUESTIONS = [
+    #{"question": "...", "expects": "..."},
+    {"question": "How difficult is the  CS 340 Databases ?", "expects": "one midterm and a final both open book"},
+    {"question": "How is  Morrow house, what are good and bad?", "expects": "built 1954 partially renovated 2008 single double rooms hall bathrooms"},
+    {"question": "what is the wait time for Verrill Street Grill?", "expects": "up to 30 minutes on Friday evenings"},
+    {"question": "Is campus shuttle free for students?", "expects": "Yes it free with a student ID "
+    },
     {"question": "Can i change my meal plan ?", "expects": "You can change your meal plan tier once, in the first ten days of the semester."},
 ]
 

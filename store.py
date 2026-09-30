@@ -18,6 +18,7 @@ rest of the project if they were wrong:
 """
 
 import os
+import re
 import shutil
 from dataclasses import dataclass
 
@@ -28,6 +29,8 @@ from dataclasses import dataclass
 os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
 
 import chromadb  # noqa: E402
+# Deb Hybrid: combine lexical BM25 retrieval with semantic vector retrieval.
+from rank_bm25 import BM25Okapi  # noqa: E402
 
 import config
 from chunker import Chunk
@@ -42,6 +45,11 @@ class Result:
     label: str
     distance: float   # LOWER IS BETTER. 0.3 is close, 0.9 is unrelated.
     produced_by: str
+
+
+def _tokenize(text: str) -> list[str]:
+    """Tokenize text for case-insensitive lexical matching."""
+    return re.findall(r"[a-z0-9]+", text.lower())
 
 
 _model = None
@@ -218,6 +226,103 @@ def search(
             )
         )
     return results
+
+
+def keyword_search(
+    question: str,
+    top_k: int | None = None,
+    corpus: str | None = None,
+    variant: str = "default",
+) -> list[Result]:
+    # Deb BM25- keyword: retrieve exact terms such as course codes, names, and prices.
+    """Retrieve chunks with BM25 keyword matching.
+
+    BM25 scores are higher-is-better, while Result.distance is lower-is-better
+    for the vector-search gate. Keyword-only results therefore use distance
+    1.0, which cannot make the relevance gate pass by itself.
+    """
+    top_k = top_k or config.TOP_K
+    name = config.collection_name(corpus, variant)
+
+    try:
+        collection = _client().get_collection(name)
+    except Exception as exc:
+        raise RuntimeError(
+            f"No index called '{name}'. Run `python app.py index` first."
+        ) from exc
+
+    stored = collection.get(include=["documents", "metadatas"])
+    documents = stored["documents"] or []
+    metadatas = stored["metadatas"] or []
+    if not documents:
+        return []
+
+    bm25 = BM25Okapi([_tokenize(document) for document in documents])
+    scores = bm25.get_scores(_tokenize(question))
+    ranked = sorted(
+        (
+            (index, float(score))
+            for index, score in enumerate(scores)
+            if score > 0
+        ),
+        key=lambda item: item[1],
+        reverse=True,
+    )[:top_k]
+
+    results: list[Result] = []
+    for index, _ in ranked:
+        metadata = metadatas[index]
+        source = str(metadata.get("source", "unknown"))
+        chunk_index = metadata.get("index", 0)
+        results.append(
+            Result(
+                text=documents[index],
+                source=source,
+                label=f"{source}#{chunk_index}",
+                distance=1.0,
+                produced_by=str(metadata.get("produced_by", "unknown")),
+            )
+        )
+    return results
+
+
+def hybrid_search(
+    question: str,
+    top_k: int | None = None,
+    corpus: str | None = None,
+    variant: str = "default",
+) -> list[Result]:
+    # Deb Hybrid: fuse vector and keyword rankings with reciprocal rank fusion.
+    """Combine vector and BM25 rankings using reciprocal rank fusion."""
+    top_k = top_k or config.TOP_K
+    candidate_k = max(top_k * 2, top_k)
+    vector_results = search(
+        question,
+        top_k=candidate_k,
+        corpus=corpus,
+        variant=variant,
+    )
+    keyword_results = keyword_search(
+        question,
+        top_k=candidate_k,
+        corpus=corpus,
+        variant=variant,
+    )
+
+    fused: dict[str, tuple[Result, float]] = {}
+    for rank, result in enumerate(vector_results, start=1):
+        fused[result.label] = (result, 1.0 / (60 + rank))
+
+    for rank, result in enumerate(keyword_results, start=1):
+        contribution = 1.0 / (60 + rank)
+        if result.label in fused:
+            existing, score = fused[result.label]
+            fused[result.label] = (existing, score + contribution)
+        else:
+            fused[result.label] = (result, contribution)
+
+    ranked = sorted(fused.values(), key=lambda item: item[1], reverse=True)
+    return [result for result, _ in ranked[:top_k]]
 
 
 def index_exists(corpus: str | None = None, variant: str = "default") -> bool:
